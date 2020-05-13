@@ -3,6 +3,11 @@
 #include <Library/PcdLib.h>
 #include <Library/UefiLib.h>
 #include <Library/UefiApplicationEntryPoint.h>
+#include <Library/UefiBootServicesTableLib.h>
+
+#include <Protocol/HiiConfigRouting.h>
+#include <Protocol/HiiConfigAccess.h>
+#include <Protocol/HiiConfigKeyword.h>
 
 //
 // String token ID of help message text.
@@ -32,12 +37,23 @@ HiiToolEntryPoint (
   IN EFI_SYSTEM_TABLE  *SystemTable
   )
 {
-  UINT32 Index;
+  EFI_STATUS Status;
+  EFI_STRING Result = NULL;
+  EFI_HII_CONFIG_ROUTING_PROTOCOL *HiiConfigRoutingProtocol = NULL;
 
-  Index = 0;
+  DEBUG((DEBUG_ERROR, "[Eric] Entering HiiToolEntryPoint\n"));
+  
+  Status = gBS->LocateProtocol(
+                  &gEfiHiiConfigRoutingProtocolGuid,
+                  NULL,
+                  &HiiConfigRoutingProtocol);
+  Print(L"LocateProtocol HiiConfigRoutingProtocol Status:%r\n", Status);
 
-  Print(L"Hello Eric Print\n");
-  DEBUG((EFI_D_ERROR, "Hello Eric debug\n"));
+  Status = HiiConfigRoutingProtocol->ExportConfig(
+                  HiiConfigRoutingProtocol,
+                  &Result);
+  Print(L"HiiConfigRoutingProtocol ExportConfig Status:%r\n", Status);
+  Print(L"Result:%s\n", Result);
 
-  return EFI_SUCCESS;
+  return Status;
 }
